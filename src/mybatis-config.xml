@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!-- 1、Mybatis的核心配置文件：做会话工厂的 -->
+    <!-- 连接环境 默认用的是第一个数据库环境-->
+    <environments default="development">
+        <!-- 2、第一个环境 -->
+        <environment id="development">
+            <!-- 3、mybatis默认开启了事务管理器，使用JDBC的代码管理事务 -->
+            <transactionManager type="JDBC"/>
+            <!-- 4、配置Mybatis的数据源信息：默认的连接池使用的是自带的POOLED连接池 -->
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql:///day20"/>
+                <property name="username" value="root"/>
+                <property name="password" value="zx023446"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <!--
+        注意2:必须在核心配置文件mybatis-config.xml中关联本映射文件的路径。
+    -->
+    <mappers>
+        <mapper resource="com/zengxing/dao/UserMapper.xml"/>
+    </mappers>
+</configuration>

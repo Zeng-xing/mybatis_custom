@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 注意：映射文件的命名空间必须是所对应接口的路径 -->
+<mapper namespace="com.zengxing.dao.UserMapper">
+    <!-- List<User> findAll();
+        id必须与被调用的方法一模一样
+        resultType : 查询的结果集的每行数据对象的类型,只有查询才需要配置结果类型
+    -->
+    <select id="findAll" resultType="com.zengxing.bean.User">
+        select * from tb_user
+    </select>
+
+</mapper>
