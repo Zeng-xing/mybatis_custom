@@ -14,7 +14,10 @@
     <select id="findById" resultType="com.zengxing.bean.User">
         select * from tb_user where id = #{id}
     </select>
-    <select id="save" resultType="com.zengxing.bean.User">
+    <select id="findByUser" resultType="com.zengxing.bean.User">
+        select * from tb_user where username = #{userName} and loginname = #{loginName} and password = #{passWord}
+    </select>
+    <select id="saveMap" resultType="com.zengxing.bean.User">
         select * from tb_user where username = #{userName} and loginname = #{loginName} and password = #{passWord}
     </select>
 

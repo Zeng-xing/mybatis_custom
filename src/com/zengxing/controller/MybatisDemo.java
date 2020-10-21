@@ -8,7 +8,9 @@ import com.zengxing.framework.SqlSession;
 import com.zengxing.util.MybatisSqlSessionFactoryUtil;
 import org.junit.Test;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,7 +55,19 @@ public class MybatisDemo {
         user.setLoginName("swk");
         user.setUserName("齐天大圣");
         user.setPassWord("tangtang");
-        List<User> users = mapper.save(user);
+        List<User> users = mapper.findByUser(user);
+        System.out.println(users);
+    }
+    @Test
+    public void queryMap(){
+        SqlSession sqlSession = MybatisSqlSessionFactoryUtil.getSqlSession();
+        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+        Map map = new HashMap();
+        map.put("loginName", "swk");
+        map.put("userName", "齐天大圣");
+        map.put("passWord", "tangtang");
+
+        List<User> users = mapper.saveMap(map);
         System.out.println(users);
     }
     @Test

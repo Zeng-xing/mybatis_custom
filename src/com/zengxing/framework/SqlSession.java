@@ -57,10 +57,19 @@ public class SqlSession implements AutoCloseable{
                 PreparedStatement pstm = connection.prepareStatement(sql.replaceAll("#[{]\\w+[}]", "?"));
                 //注入参数
                 if (args != null && args.length != 0) {
+                    //只有一个参数
                     if(args.length == 1){
                         if(checkClass(args[0])){
                             pstm.setObject(1,args[0]);
+                        }else if(args[0] instanceof Map){
+                            Map map = (Map) args[0];
+                            Map<Integer,String> paraNames = getParaNames(sql);
+                            Set<Map.Entry<Integer, String>> entries = paraNames.entrySet();
+                            for (Map.Entry<Integer, String> entry : entries) {
+                                pstm.setObject(entry.getKey(),map.get(entry.getValue()));
+                            }
                         }else {
+                            //参数为自定义bean对象
                             Class<?> paraClass = args[0].getClass();
                             Map<Integer,String> paraNames = getParaNames(sql);
                             Set<Map.Entry<Integer, String>> entries = paraNames.entrySet();
