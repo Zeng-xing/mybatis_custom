@@ -1,20 +1,18 @@
 package com.zengxing.framework;
 
-import com.alibaba.druid.pool.DruidDataSource;
-import com.zengxing.dao.UserMapper;
-
-import javax.sql.DataSource;
 import java.lang.reflect.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @AuThor：zengxing
  * @DATE:2020/10/18 17:27  250
  */
+
 public class SqlSession implements AutoCloseable{
     private Connection connection;
 
@@ -56,33 +54,94 @@ public class SqlSession implements AutoCloseable{
                 }
                 //2.执行sql语句
                 String sql = currentMapper.getSql();
-                PreparedStatement pstm = connection.prepareStatement(sql);
+                PreparedStatement pstm = connection.prepareStatement(sql.replaceAll("#[{]\\w+[}]", "?"));
+                //注入参数
+                if (args != null && args.length != 0) {
+                    if(args.length == 1){
+                        if(checkClass(args[0])){
+                            pstm.setObject(1,args[0]);
+                        }else {
+                            Class<?> paraClass = args[0].getClass();
+                            Map<Integer,String> paraNames = getParaNames(sql);
+                            Set<Map.Entry<Integer, String>> entries = paraNames.entrySet();
+                            for (Map.Entry<Integer, String> entry : entries) {
+                                Method getMethod = paraClass.getDeclaredMethod("get" + toUpperCase(entry.getValue()));
+                                if(getMethod != null){
+                                    Object value = getMethod.invoke(args[0]);
+                                    pstm.setObject(entry.getKey(),value);
+                                }
+                            }
+                        }
+                    }
+                }
                 switch (currentMapper.getTag()){
                     case "select":
-                        ResultSet rs = pstm.executeQuery();
-                        Class dataClass = Class.forName(currentMapper.getResultType());
-                        List<Object> datas = new ArrayList<>();
-                        while (rs.next()){
-                            Field[] fields = dataClass.getDeclaredFields();
-                            Object data = dataClass.getDeclaredConstructor().newInstance();
-                            for (Field field : fields) {
-                                field.setAccessible(true);
-                                field.set(data,rs.getObject(field.getName()));
-                            }
-                            datas.add(data);
-                        }
-                        return datas;
+                        return execute(pstm,currentMapper.getResultType());
                     case "delete":
-                        break;
+                        return execute(pstm);
                     case "update":
-                        break;
+                        return execute(pstm);
                     case "insert":
-                        break;
+                        return execute(pstm);
                     default:
-                        break;
+                        return execute(pstm);
                 }
-                return null;
             }
         });
+    }
+    public Object execute(PreparedStatement pstm,String resultType) throws Exception {
+        ResultSet rs = pstm.executeQuery();
+        Class dataClass = Class.forName(resultType);
+        List<Object> datas = new ArrayList<>();
+        while (rs.next()){
+            Field[] fields = dataClass.getDeclaredFields();
+            Object data = dataClass.getDeclaredConstructor().newInstance();
+            for (Field field : fields) {
+                field.setAccessible(true);
+                field.set(data,rs.getObject(field.getName()));
+            }
+            datas.add(data);
+        }
+        return datas;
+    }
+    public int execute(PreparedStatement pstm) throws Exception {
+        int count = pstm.executeUpdate();
+        return count;
+    }
+
+    /**
+     * 解析sql中参数的参数名#{userName} -> userName
+     * @param sql
+     * @return
+     */
+    public Map<Integer,String> getParaNames(String sql){
+        Pattern p= Pattern.compile("[{](?<paraName>.*?)}");
+        Matcher m=p.matcher(sql);
+        Map<Integer,String> paraNames = new HashMap<>();
+        int count = 1;
+        while (m.find()) {
+            paraNames.put(count++, m.group("paraName"));
+        }
+        return paraNames;
+    }
+
+    public Boolean checkClass(Object o){
+        Boolean flag = false;
+        if(o instanceof Number||o instanceof Character||o instanceof Boolean||o instanceof String){
+            flag = true;
+        }
+        return flag;
+    }
+
+    /**
+     * 将字符串的首字母转大写
+     * @param str 需要转换的字符串
+     * @return
+     */
+    private static String toUpperCase(String str) {
+        // 进行字母的ascii编码前移，效率要高于截取字符串进行转换的操作
+        char[] cs=str.toCharArray();
+        cs[0]-=32;
+        return String.valueOf(cs);
     }
 }
