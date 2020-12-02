@@ -20,5 +20,8 @@
     <select id="saveMap" resultType="com.zengxing.bean.User">
         select * from tb_user where username = #{userName} and loginname = #{loginName} and password = #{passWord}
     </select>
+    <insert id = "save">
+        insert into tb_user (loginName,userName,passWord) values(#{loginName},#{userName},#{passWord})
+    </insert>
 
 </mapper>

@@ -1,6 +1,5 @@
 package com.zengxing.controller;
 
-import com.alibaba.druid.sql.visitor.functions.Char;
 import com.zengxing.bean.User;
 import com.zengxing.dao.UserMapper;
 import com.zengxing.framework.Configuration;
@@ -57,6 +56,17 @@ public class MybatisDemo {
         user.setPassWord("tangtang");
         List<User> users = mapper.findByUser(user);
         System.out.println(users);
+    }
+    @Test
+    public void insert(){
+        SqlSession sqlSession = MybatisSqlSessionFactoryUtil.getSqlSession();
+        UserMapper mapper = sqlSession.getMapper(UserMapper.class);
+        User user = new User();
+        user.setLoginName("swk5");
+        user.setUserName("齐天大圣5");
+        user.setPassWord("tangtang5");
+        int num = mapper.save(user);
+        System.out.println(num);
     }
     @Test
     public void queryMap(){

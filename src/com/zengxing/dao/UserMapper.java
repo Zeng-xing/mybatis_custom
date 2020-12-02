@@ -17,4 +17,6 @@ public interface UserMapper {
     List<User> findByUser(User user);
 
     List<User> saveMap(Map map);
+
+    int save(User user);
 }
